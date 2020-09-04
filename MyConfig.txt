@@ -1,0 +1,348 @@
+一、文件编码格式
+    File Encoding设置为UTF-8
+    C盘的idea64.exe.vmoptions，在文件末尾添加-Dfile.encoding=UTF-8
+二、自动提示忽略大小写：Editor--general--CodeCompletion--Case sensitive修改为none
+三、字体调整
+    1.代码：字体：Courier New     size：18     line spacing：1.1
+    2.控制台：
+四、窗口相关：
+    1.关闭tab页：editor-general-editor tabs-Placement设置为none
+    2.关闭导航栏：view--Navigation bar
+五、Editor-Live Template:建立自己的group
+    1.自动生成方法说明：
+		(1).Abbreviation:  mcom
+		(2).Descriptions:  generate method level comment
+		(3).Template text中的文本如下：
+            /**
+             * <>说明</>
+             $params$
+             * @return  $returns$
+             * @author  <>liaoxinyi</>
+             * @date  <>$date$</>
+             */
+
+        (4).然后点击 Edit variable
+                        1.date:date()
+                        2.time:time()
+                        3.params:
+                        groovyScript("def result=''; def params=\"${_1}\".replaceAll('[\\\\[|\\\\]|\\\\s]', '').split(',').toList(); for(i = 0; i < params.size(); i++) {if(params[i] == '') return result;result+=' * @param  <>' + params[i] + '</>  <>说明</>' + ((i < params.size() - 1) ? '\\n' : '')}; return result", methodParameters()) 
+                        4.retrurns:methodReturnType()
+                        点击Define设置信息
+                        点击Apply，OK
+    2.自动生成类说明：
+        /**
+         * <>功能</>
+         *
+         * @author  <>liaoxinyi</>
+         * @date <>$DATE$</>
+         * @since  <>V1.0.0</>
+         */
+         其中的变量：DATE     date()
+    3.自动生成成员变量注入
+        /**
+         * $TYPE$
+         */
+        @Autowired
+        private $TYPE$ $NAME$;
+        其中的变量：TYPE  capitalize(clipboard())     NAME   decapitalize(clipboard())
+    4.自动生成log的final成员变量
+        /**
+         * <>logger</>
+         */
+        private static final HikGaLogger HIK_LOG = HikGaLoggerFactory.getLogger($CLASS$.class);
+        其中的变量：CLASS     className()
+六、Editor-File and Code Template
+    1.Class：
+        #if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+        #parse("File Header.java")
+        /** 
+        <>${description}</>
+        @author  <>liaoxinyi</>
+        @date <>${YEAR}/${MONTH}/${DAY}</>
+        @since  <>V1.0</>
+        **/
+        public class ${NAME} {
+        }
+    2.Interface：
+        #if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+        #parse("File Header.java")
+        /** 
+        <>${description}</>
+        @author  <>liaoxinyi</>
+        @date <>${YEAR}/${MONTH}/${DAY}</>
+        @since  <>V1.0</>
+        **/
+        public interface ${NAME} {
+        }
+七、groovy配置文件：
+    1.目录：C:\Users\用户名\.IntelliJIdea2018.2\config\extensions\com.intellij.database\schema
+八、插件
+    1.Codemaker-JPA
+        ---------------------------------------------
+        ---------------Codemaker配置--------------------------
+        -------------------------------------------------------
+        Template Name：RepositoryJPA
+        Class Number：1
+        Class Name：${class0.className}Repository
+        -----body
+        #macro (low $strIn)$strIn.valueOf($strIn.charAt(0)).toLowerCase()$strIn.substring(1)#end 
+        package ${class0.PackageName};
+
+        import ${class0.PackageName}.$class0.className;
+        import org.springframework.data.domain.Page;
+        import org.springframework.data.domain.Pageable;
+        import org.springframework.data.jpa.repository.JpaRepository;
+        import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+        import org.springframework.data.jpa.repository.Modifying;
+        import org.springframework.data.jpa.repository.Query;
+        import java.util.List;
+
+        /** 
+         * <>功能</>
+         *
+         * @author  <>liaoxinyi</>
+         * @date <>$TIME</>
+         * @since  <>V1.0</>
+         */
+        public interface $ClassName extends JpaRepository<$class0.className, Long>,
+            JpaSpecificationExecutor<$class0.className> {
+
+          /**
+           * @return 
+           * @description 
+           * @param  
+           */
+          @Modifying
+          @Query(value = "UPDATE tb_user AS u "
+              + "SET u.user_phone = ?1 , u.user_mail = ?2 , u.user_address = ?3 "
+              + "WHERE u.user_name = ?4", nativeQuery = true)
+          int update(String userPhone, String userMail, String userAddress, String userName);
+            
+          /**
+           * @return 
+           * @description 
+           * @param  
+           */
+          @Query(value = "SELECT pk_user_id FROM tb_user AS u WHERE u.user_name = ?1", nativeQuery = true)
+          int find(String userName);
+          
+          /**
+           * @return 
+           * @description 
+           * @param  
+           */
+          Page<$class0.className> findByContaining(String userName, Pageable pageable);
+          
+          /**
+           * @return 
+           * @description 
+           * @param  
+           */
+          List<$class0.className> findBy(String userName);
+          
+          /**
+           * @return 
+           * @description 
+           * @param  
+           */
+          @Modifying
+          @Query(value = "DELETE FROM tb_user AS u WHERE u.user_name = ?1", nativeQuery = true)
+          void delete(String userName);
+
+        }
+    2.Codemaker-Mapper
+        -------body
+        Template Name：Mapper
+        Class Number：1
+        Class Name：${class0.className}Mapper
+        -------------------
+        #macro (low $strIn)$strIn.valueOf($strIn.charAt(0)).toLowerCase()$strIn.substring(1)#end 
+        package ${class0.PackageName};
+
+        import ${class0.PackageName}.$class0.className;
+        import java.util.List;
+        import org.apache.ibatis.annotations.Delete;
+        import org.apache.ibatis.annotations.Insert;
+        import org.apache.ibatis.annotations.Result;
+        import org.apache.ibatis.annotations.ResultType;
+        import org.apache.ibatis.annotations.Results;
+        import org.apache.ibatis.annotations.Select;
+        import org.apache.ibatis.annotations.Update;
+        import org.springframework.stereotype.Component;
+
+        /** 
+         * <>功能</>
+         *
+         * @author  <>liaoxinyi</>
+         * @date <>$TIME</>
+         * @since  <>V1.0</>
+         */
+        @Component
+        public interface $ClassName {
+
+          /**
+           * @return 
+           * @description 
+           * @param  
+           */
+          @Select("SELECT pk_user_id userId , user_phone userPhone FROM tb_user AS u WHERE u.user_name = #{xxx}")
+          @ResultType(${class0.className}.class)
+          List<${class0.className}> get${class0.className}ByXxx(String xxx);
+          
+            
+          /**
+           * @return 
+           * @description 
+           * @param  
+           */
+            @Insert("INSERT INTO users(userName,passWord,user_sex) VALUES(#{userName}, #{passWord}, #{userSex})")
+            void insert(${class0.className} #low(${class0.className}));
+          
+          /**
+           * @return 
+           * @description 
+           * @param  
+           */
+          @Update("UPDATE users SET userName=#{userName},nick_name=#{nickName} WHERE id =#{id}")
+          void update(${class0.className} #low(${class0.className}));
+          
+          /**
+           * @return 
+           * @description:
+           * @param  
+           */
+          @Delete("DELETE FROM users WHERE id =#{id}")
+          void delete(Long id);
+        }
+    3.Junit
+        --------------------------------
+        ----------------------------------
+        --------------Junit-------------------
+        OutputPath：  ${SOURCEPATH}/../../test/java/${PACKAGE}/${FILENAME}
+
+        -----Junit4-----
+        ######################################################################################## 
+        ## 
+        ## Available variables: 
+        ##         $entryList.methodList - List of method composites 
+        ##         $entryList.privateMethodList - List of private method composites 
+        ##         $entryList.fieldList - ArrayList of class scope field names 
+        ##         $entryList.className - class name 
+        ##         $entryList.packageName - package name 
+        ##         $today - Todays date in MM/dd/yyyy format 
+        ## 
+        ##            MethodComposite variables: 
+        ##                $method.name - Method Name 
+        ##                $method.signature - Full method signature in String form 
+        ##                $method.reflectionCode - list of strings representing commented out reflection code to access method (Private Methods) 
+        ##                $method.paramNames - List of Strings representing the method's parameters' names 
+        ##                $method.paramClasses - List of Strings representing the method's parameters' classes 
+        ## 
+        ## You can configure the output class name using "testClass" variable below. 
+        ## Here are some examples: 
+        ## Test${entry.ClassName} - will produce TestSomeClass 
+        ## ${entry.className}Test - will produce SomeClassTest 
+        ## 
+        ######################################################################################## 
+        ## 
+        #macro (cap $strIn)$strIn.valueOf($strIn.charAt(0)).toUpperCase()$strIn.substring(1)#end
+        #macro (low $strIn)$strIn.valueOf($strIn.charAt(0)).toLowerCase()$strIn.substring(1)#end 
+        ## Iterate through the list and generate testcase for every entry. 
+        #foreach ($entry in $entryList) 
+        #set( $testClass="${entry.className}Test") 
+        ## 
+        package java.$entry.packageName; 
+
+        import com.alibaba.fastjson.JSONObject;
+        import com.alibaba.fastjson.TypeReference;
+        import mockit.Expectations;
+        import mockit.Injectable;
+        import mockit.Tested;
+        import org.junit.Assert;
+        import org.junit.Test;
+
+        /** 
+         * </>${entry.className} Tester</>
+         *
+         * @author  <>liaoxinyi</>
+         * @date <>$today</>
+         * @since  <>V1.0</>
+         */
+        public class $testClass { 
+
+        @Tested
+        private $entry.className #low(${entry.className});
+
+
+        #foreach($method in $entry.methodList) 
+        /** 
+        * 
+        * Method: $method.signature 
+        * 
+        */ 
+        @Test
+        public void successTestOf#cap(${method.name})(
+        #foreach($field in $entry.fieldList) 
+        @Injectable #cap(${field}) #low(${field}),
+        #end
+        )
+        { 
+                // Record
+                new Expectations() {
+                    {
+                String jsonResult="XXXXX";
+                BaseResult modelResult=JSONObject.parseObject(jsonResult, new TypeReference<BaseResult>(){});
+                //feign method:  xxxx.yyy((XXX)any);
+
+                result=modelResult;
+                   }
+                 };
+                //private method
+                new MockUp<XXXImpl>(){
+                    @Mock
+                    private String getXXX(String xxx){
+                        return "XXXX";
+                    }
+                };
+                 //Replay
+                BaseResult result= #low(${entry.className}).${method.name}();
+                //Verification
+                Assert.assertTrue(result.getType() == 0);
+        }
+        #end 
+
+        #foreach($method in $entry.methodList) 
+        /** 
+        * 
+        * Method: $method.signature 
+        * 
+        */ 
+        @Test(expected = Exception.class)
+        public void failureTestOf#cap(${method.name})(
+        #foreach($field in $entry.fieldList) 
+        @Injectable #cap(${field}) #low(${field}),
+        #end
+        )
+        { 
+                // Record
+                new Expectations() {
+                    {
+                String jsonResult="XXXXX";
+                BaseResult modelResult=JSONObject.parseObject(jsonResult, new TypeReference<BaseResult>(){});
+                //feign method:  xxxx.yyy((XXX)any);
+                
+                result=modelResult;
+                   }
+                 };
+                 //Replay
+                BaseResult result= #low(${entry.className}).${method.name}();
+                //Verification
+                Assert.assertTrue(result.getType() == 0);
+        }
+        #end 
+
+
+        } 
+        }
+        #end
+        -----------------------------------------------
